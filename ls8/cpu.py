@@ -7,7 +7,10 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.pc = 0
+        self.reg = [0]*8
+        self.ram = [0]*256 #or should we do 255?
+
 
     def load(self):
         """Load a program into memory."""
@@ -19,8 +22,8 @@ class CPU:
         program = [
             # From print8.ls8
             0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
+            0b00000000, #argument for R0
+            0b00001000, #value of 8
             0b01000111, # PRN R0
             0b00000000,
             0b00000001, # HLT
@@ -60,6 +63,36 @@ class CPU:
 
         print()
 
+    # ram_read() should accept the address to read and return the value stored there.
+    def ram_read(self, pc):
+        return self.ram[pc]
+
+    # ram_write() should accept a value to write, and the address to write it to.
+    def ram_write(self, pc, value):
+        self.ram[pc] = value
+
+
     def run(self):
         """Run the CPU."""
-        pass
+        while self.ram_read(self.pc) != HLT:
+
+            # instruction = memory[pc]
+            instruction = self.ram_read(self.pc)
+
+            # LDI: load "immediate", store a value in a register, or "set this register to this value".
+            if instruction == LDI:
+                # read the bytes at PC+1 and PC+2 from RAM into variables operand_a and operand_b
+                operand_a = self.ram_read(self.pc + 1)
+                operand_b = self.ram_read(self.pc + 2)
+
+                # Set the value of a register to an integer.
+                # register[reg_num] = value
+		        # pc += 3
+
+                self.reg[operand_a] = value
+                self.pc += 3
+
+
+            # PRN: a pseudo-instruction that prints the numeric value stored in a register.
+            elif instruction == PRN:
+                pass
