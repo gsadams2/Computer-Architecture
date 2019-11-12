@@ -2,13 +2,18 @@
 
 import sys
 
+
+LDI = 0b10000010
+PRN = 0b01000111
+HLT = 0b00000001
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
         self.pc = 0
-        self.reg = [0]*8
+        self.reg = [0]*8 #these are like our variables... R0, R1,... R7
         self.ram = [0]*256 #or should we do 255?
 
 
@@ -21,9 +26,10 @@ class CPU:
 
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
+            0b10000010, # LDI R0,8.... save value 8 in register 0
             0b00000000, #argument for R0
-            0b00001000, #value of 8
+            0b00001000, #argument.... value of 8
+
             0b01000111, # PRN R0
             0b00000000,
             0b00000001, # HLT
@@ -82,17 +88,24 @@ class CPU:
             # LDI: load "immediate", store a value in a register, or "set this register to this value".
             if instruction == LDI:
                 # read the bytes at PC+1 and PC+2 from RAM into variables operand_a and operand_b
-                operand_a = self.ram_read(self.pc + 1)
-                operand_b = self.ram_read(self.pc + 2)
+                operand_register = self.ram_read(self.pc + 1)
+                operand_value = self.ram_read(self.pc + 2)
 
                 # Set the value of a register to an integer.
                 # register[reg_num] = value
 		        # pc += 3
 
-                self.reg[operand_a] = value
+                self.reg[operand_register] = operand_value
+
+                #3 byte instruction
                 self.pc += 3
 
 
             # PRN: a pseudo-instruction that prints the numeric value stored in a register.
             elif instruction == PRN:
-                pass
+                operand_register = self.ram_read(self.pc + 1)
+
+                print(self.reg[operand_register])
+
+                #2 byte instruction so add 2
+                self.pc += 2
