@@ -6,6 +6,7 @@ import sys
 LDI = 0b10000010
 PRN = 0b01000111
 HLT = 0b00000001
+MUL = 0b10100010
 
 class CPU:
     """Main CPU class."""
@@ -20,24 +21,55 @@ class CPU:
     def load(self):
         """Load a program into memory."""
 
-        address = 0
+        
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8.... save value 8 in register 0
-            0b00000000, #argument for R0
-            0b00001000, #argument.... value of 8
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8.... save value 8 in register 0
+            
+        #     0b00000000, #argument for R0
+            
+        #     0b00001000, #argument.... value of 8
 
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        
+
+
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
+
+        
+        address = 0
+
+        if len(sys.argv) != 2:
+            print("usage: ls8.py filename")
+            sys.exit(1)
+        
+        progname = sys.argv[1]
+
+
+        with open(progname) as f:
+            for line in f:
+                line = line.split("#")[0]
+                line = line.strip() #lose whitespace 
+
+                if line == "":
+                    continue
+
+                val = int(line, 2) #binary so it's base 2
+
+                self.ram[address] = val
+                address += 1
+
+
+
 
 
     def alu(self, op, reg_a, reg_b):
@@ -46,6 +78,8 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -70,12 +104,12 @@ class CPU:
         print()
 
     # ram_read() should accept the address to read and return the value stored there.
-    def ram_read(self, pc):
-        return self.ram[pc]
+    def ram_read(self, memory_address):
+        return self.ram[memory_address]
 
     # ram_write() should accept a value to write, and the address to write it to.
-    def ram_write(self, pc, value):
-        self.ram[pc] = value
+    def ram_write(self, memory_address, value):
+        self.ram[memory_address] = value
 
 
     def run(self):
@@ -109,3 +143,9 @@ class CPU:
 
                 #2 byte instruction so add 2
                 self.pc += 2
+
+            elif instruction == MUL:
+                operand_a = self.ram_read(self.pc + 1)
+                operand_b = self.ram_read(self.pc + 2)
+                self.alu("MUL", operand_a, operand_b)
+                self.pc += 3
