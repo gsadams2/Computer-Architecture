@@ -9,6 +9,17 @@ HLT = 0b00000001
 MUL = 0b10100010
 PUSH = 0b01000101
 POP = 0b01000110
+CALL = 0b01010000
+RET = 0b00010001
+JMP = 0b01010100
+
+# Call does two things
+# 1) store return address on the stack  
+# 2) set the pc to whatever was in the register 
+
+# Return does two things
+# 1) pop the value off the stack
+# 2) take the value that it got off the stakc and  put it into that PC
 
 class CPU:
     """Main CPU class."""
@@ -181,4 +192,30 @@ class CPU:
                 self.reg[self.SP] += 1 #incremeent the SP
 
                 self.pc += 2 # 2 byte instruction
+            
+            elif instruction == CALL:
+                #push return addr on stack
+            
+                return_address = self.pc + 2 # we know return address will be +2 b/c call is a 2 byte function
+                self.reg[self.SP] -= 1 #decrement sp 
+                self.ram[self.reg[self.SP]] = return_address
+
+
+                #set the pc to the value in the register 
+                
+                reg_num = self.ram[self.pc + 1]
+                print(f"this should be 1...... {reg_num}")
+
+                print(f"this should be 24....... {self.reg[1]}")
+                self.pc = self.reg[reg_num]
+
+            elif instruction == RET:
+                # pop the return address off stack
+                # store it in the pc 
+                self.pc = self.ram[self.reg[self.SP]]
+                
+                self.reg[self.SP] += 1
+            
+     
+
 
