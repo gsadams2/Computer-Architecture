@@ -7,6 +7,8 @@ LDI = 0b10000010
 PRN = 0b01000111
 HLT = 0b00000001
 MUL = 0b10100010
+PUSH = 0b01000101
+POP = 0b01000110
 
 class CPU:
     """Main CPU class."""
@@ -16,6 +18,9 @@ class CPU:
         self.pc = 0
         self.reg = [0]*8 #these are like our variables... R0, R1,... R7
         self.ram = [0]*256 #or should we do 255?
+        self.SP = 7
+        self.reg[self.SP] = 0xf4 #initialize SP to empty stack 
+
 
 
     def load(self):
@@ -149,3 +154,31 @@ class CPU:
                 operand_b = self.ram_read(self.pc + 2)
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
+
+            elif instruction == PUSH:
+                self.reg[self.SP] -= 1 # decrement sp 
+
+                # need register number... push is a two byte instruction 
+                reg_num = self.ram_read(self.pc + 1)
+                
+                # now need value so we can copy it into memory where the stack pointer is 
+                reg_value = self.reg[reg_num]
+
+                
+                # copy register value into memory at the address SP
+                self.ram[self.reg[self.SP]] = reg_value
+
+                self.pc += 2 # 2 byte instruction
+            
+            elif instruction == POP:
+                # get the value out of memory where the stack pointer is pointing
+                val = self.ram[self.reg[self.SP]]
+
+                reg_num = self.ram[self.pc + 1]
+
+                self.reg[reg_num] = val  # copy val from memory at SP into register 
+
+                self.reg[self.SP] += 1 #incremeent the SP
+
+                self.pc += 2 # 2 byte instruction
+
