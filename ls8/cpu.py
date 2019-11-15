@@ -12,6 +12,7 @@ POP = 0b01000110
 CALL = 0b01010000
 RET = 0b00010001
 JMP = 0b01010100
+ADD = 0b10100000
 
 # Call does two things
 # 1) store return address on the stack  
@@ -204,10 +205,15 @@ class CPU:
                 #set the pc to the value in the register 
                 
                 reg_num = self.ram[self.pc + 1]
-                print(f"this should be 1...... {reg_num}")
+        
 
-                print(f"this should be 24....... {self.reg[1]}")
                 self.pc = self.reg[reg_num]
+            
+            elif instruction == ADD:
+                operand_a = self.ram_read(self.pc + 1)
+                operand_b = self.ram_read(self.pc + 2)
+                self.alu("ADD", operand_a, operand_b)
+                self.pc += 3
 
             elif instruction == RET:
                 # pop the return address off stack
@@ -215,6 +221,11 @@ class CPU:
                 self.pc = self.ram[self.reg[self.SP]]
                 
                 self.reg[self.SP] += 1
+            
+            else:
+                print("UNKNOWN INSTRUCTION")
+                break
+                
             
      
 
