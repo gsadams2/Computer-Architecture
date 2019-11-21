@@ -13,6 +13,7 @@ CALL = 0b01010000
 RET = 0b00010001
 JMP = 0b01010100
 ADD = 0b10100000
+PRA = 0b01001000
 
 # Call does two things
 # 1) store return address on the stack  
@@ -127,6 +128,8 @@ class CPU:
     # ram_write() should accept a value to write, and the address to write it to.
     def ram_write(self, memory_address, value):
         self.ram[memory_address] = value
+    
+    
 
 
     def run(self):
@@ -161,6 +164,16 @@ class CPU:
                 #2 byte instruction so add 2
                 self.pc += 2
 
+            elif instruction == PRA:
+                operand_register = self.ram_read(self.pc + 1)
+
+                # Print alpha character value stored in the given registe
+                hello = self.reg[operand_register]
+                print(chr(hello))
+
+                #2 byte instruction so add 2
+                self.pc += 2
+                
             elif instruction == MUL:
                 operand_a = self.ram_read(self.pc + 1)
                 operand_b = self.ram_read(self.pc + 2)
